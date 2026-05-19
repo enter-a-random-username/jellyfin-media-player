@@ -335,7 +335,14 @@ void PlayerComponent::queueMedia(const QString& url, const QVariantMap& options,
 
   command << extraArgs;
 
-  m_mpv->command( command);
+ {
+    QStringList stringCommand;
+    stringCommand.reserve(command.size());
+    for (const QVariant &v : command)
+        stringCommand << v.toString();
+
+    m_mpv->command(stringCommand);
+ }
 
   QVariantMap jellyfinMetadata = metadata["metadata"].toMap();
   QUrl jellyfinBaseUrl = qurl.adjusted(QUrl::RemovePath | QUrl::RemoveQuery);
@@ -850,8 +857,10 @@ void PlayerComponent::seekTo(qint64 ms)
     return;
   }
   double timeSecs = ms / 1000.0;
-  QVariantList args = (QVariantList() << "seek" << timeSecs << "absolute+exact");
-  m_mpv->command( args);
+  QStringList args;
+  args << "seek" << QString::number(timeSecs) << "absolute+exact";
+
+  m_mpv->command(args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
